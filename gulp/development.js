@@ -12,11 +12,14 @@ var gulp = require('gulp'),
     css: ['packages/**/*.css', '!packages/**/node_modules/**', '!packages/**/assets/**/lib/**','!packages/core/**/public/assets/css/*.css'],
     less: ['packages/**/*.less', '!packages/**/_*.less', '!packages/**/node_modules/**', '!packages/**/assets/**/lib/**'],
     sass: ['packages/**/*.scss', '!packages/**/node_modules/**', '!packages/**/assets/**/lib/**'],
-    coffee: ['packages/**/*.coffee', '!packages/**/node_modules/**', '!packages/**/assets/**/lib/**']
+    coffee: ['packages/**/*.coffee', '!packages/**/node_modules/**', '!packages/**/assets/**/lib/**'],
+	dbDir : 'mongodb-dev/data',
+	dbLogs : 'mongodb-dev/logs'
   };
 
+ 
 /*var defaultTasks = ['clean', 'jshint', 'less', 'csslint', 'devServe', 'watch'];*/
-var defaultTasks = ['coffee','clean', 'less', 'sass', 'csslint', 'devServe', 'watch'];
+var defaultTasks = ['mongo-start','coffee','clean', 'less', 'sass', 'csslint', 'devServe', 'watch'];
 
 gulp.task('env:development', function () {
   process.env.NODE_ENV = 'development';
@@ -108,5 +111,34 @@ function count(taskName, message) {
   }
   return through(countFiles, endStream);
 }
+
+
+//mongodb tasks
+var exec = require('child_process').exec;
+//var mkdirs = require('mkdirs');
+
+ 
+var runCommand = function(command) {
+  exec(command, function (err, stdout, stderr) {
+    console.log(stdout);
+    console.log(stderr);
+	console.log('shit happens');
+    if (err !== null) {
+      console.log('exec error: ' + err);
+    }
+  });
+}
+
+gulp.task("mongo-start", function() {
+  var command = "mongod --fork --dbpath "+paths.dbDir+"/ --logpath "+paths.dbLogs+"/mongo.log";
+  runCommand(command);
+});
+
+gulp.task("mongo-stop", function() {
+  var command = 'mongo admin --eval "db.shutdownServer();"'
+  runCommand(command);
+});
+
+
 
 gulp.task('development', defaultTasks);
